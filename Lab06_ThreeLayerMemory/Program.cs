@@ -16,7 +16,7 @@ namespace Lab06_ThreeLayerMemory
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmDanhSach());
+            Application.Run(new frmSanPham());
         }
     }
 }
