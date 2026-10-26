@@ -40,6 +40,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.lvSinhVien = new System.Windows.Forms.ListView();
+            this.tvKhoa = new System.Windows.Forms.TreeView();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSinhVien)).BeginInit();
             this.SuspendLayout();
             // 
@@ -152,11 +153,19 @@
             this.lvSinhVien.UseCompatibleStateImageBehavior = false;
             this.lvSinhVien.SelectedIndexChanged += new System.EventHandler(this.lvSinhVien_SelectedIndexChanged);
             // 
+            // tvKhoa
+            // 
+            this.tvKhoa.Location = new System.Drawing.Point(494, 26);
+            this.tvKhoa.Name = "tvKhoa";
+            this.tvKhoa.Size = new System.Drawing.Size(298, 97);
+            this.tvKhoa.TabIndex = 12;
+            // 
             // frmDanhSach
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1087, 622);
+            this.Controls.Add(this.tvKhoa);
             this.Controls.Add(this.lvSinhVien);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -192,5 +201,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ListView lvSinhVien;
+        private System.Windows.Forms.TreeView tvKhoa;
     }
 }
