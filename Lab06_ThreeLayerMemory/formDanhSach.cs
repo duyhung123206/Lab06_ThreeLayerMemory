@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
+using Lab06_ThreeLayerMemory.BLL;
 
 namespace Lab06_ThreeLayerMemory
 {
     public partial class frmDanhSach : Form
     {
-        private BindingList<SinhVien> _ds = new BindingList<SinhVien>();
+        // Giao diện chỉ gọi qua BUS
+        private SinhVienBUS _bus = new SinhVienBUS();
 
         public frmDanhSach()
         {
@@ -17,10 +19,15 @@ namespace Lab06_ThreeLayerMemory
 
         private void frmDanhSach_Load(object sender, EventArgs e)
         {
-            _ds.Add(new SinhVien("SV01", "Nguyễn An", new DateTime(2004, 5, 12), 8.2, "Công nghệ Thông tin"));
-            _ds.Add(new SinhVien("SV02", "Trần Bình", new DateTime(2004, 8, 20), 7.0, "Hệ thống Thông tin"));
+            // Thêm dữ liệu mẫu ban đầu qua BUS
+            try
+            {
+                _bus.Add(new SinhVien("SV01", "Nguyễn An", new DateTime(2004, 5, 12), 8.2, "Công nghệ Thông tin"));
+                _bus.Add(new SinhVien("SV02", "Trần Bình", new DateTime(2004, 8, 20), 7.0, "Hệ thống Thông tin"));
+            }
+            catch { }
 
-            // DataGridView
+            // --- 1. Cấu hình DataGridView ---
             dgvSinhVien.AutoGenerateColumns = false;
             if (dgvSinhVien.Columns.Count == 0)
             {
@@ -29,10 +36,10 @@ namespace Lab06_ThreeLayerMemory
                 dgvSinhVien.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "NgaySinh", HeaderText = "Ngày Sinh" });
                 dgvSinhVien.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "DiemTB", HeaderText = "Điểm TB" });
             }
-            dgvSinhVien.DataSource = _ds;
+            RefreshDataGrid();
             dgvSinhVien.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
 
-            // ListView
+            // --- 2. Cấu hình ListView dạng Details ---
             lvSinhVien.View = View.Details;
             lvSinhVien.FullRowSelect = true;
             lvSinhVien.GridLines = true;
@@ -42,10 +49,16 @@ namespace Lab06_ThreeLayerMemory
                 lvSinhVien.Columns.Add("Họ và Tên", 150, HorizontalAlignment.Left);
                 lvSinhVien.Columns.Add("Điểm TB", 80, HorizontalAlignment.Left);
             }
-            LoadListView(_ds);
+            LoadListView(_bus.GetAll());
 
-            // TreeView
-            LoadTree(_ds);
+            // --- 3. Cấu hình TreeView theo Khoa ---
+            LoadTree(_bus.GetAll());
+        }
+
+        private void RefreshDataGrid()
+        {
+            BindingList<SinhVien> listShow = new BindingList<SinhVien>(_bus.GetAll());
+            dgvSinhVien.DataSource = listShow;
         }
 
         private void LoadListView(IEnumerable<SinhVien> data)
@@ -61,7 +74,7 @@ namespace Lab06_ThreeLayerMemory
             }
         }
 
-        private void LoadTree(BindingList<SinhVien> listSinhVien)
+        private void LoadTree(List<SinhVien> listSinhVien)
         {
             tvKhoa.Nodes.Clear();
             var dataGroup = listSinhVien.GroupBy(x => x.Khoa)
@@ -81,40 +94,36 @@ namespace Lab06_ThreeLayerMemory
             tvKhoa.ExpandAll();
         }
 
+        // 1. Chức năng Thêm sinh viên (Thông qua BUS kiểm tra nghiệp vụ)
         private void btnThem_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtMaSV.Text))
-            {
-                MessageBox.Show("Vui lòng nhập mã sinh viên!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (_ds.Any(x => x.MaSV == txtMaSV.Text.Trim()))
-            {
-                MessageBox.Show("Mã sinh viên đã tồn tại.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
             try
             {
-                _ds.Add(new SinhVien(
+                SinhVien sv = new SinhVien(
                     txtMaSV.Text.Trim(),
                     txtHoTen.Text.Trim(),
                     dtpNgaySinh.Value,
-                    double.Parse(txtDiemTB.Text)
-                ));
+                    double.Parse(txtDiemTB.Text),
+                    "Công nghệ Thông tin"
+                );
 
-                LoadListView(_ds);
-                LoadTree(_ds);
+                // Gọi BUS xử lý
+                _bus.Add(sv);
+
+                // Cập nhật lại giao diện
+                RefreshDataGrid();
+                LoadListView(_bus.GetAll());
+                LoadTree(_bus.GetAll());
 
                 MessageBox.Show("Thêm sinh viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi định dạng dữ liệu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi: " + ex.Message, "Thông báo lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // 2. Chức năng Xóa sinh viên
         private void btnXoa_Click(object sender, EventArgs e)
         {
             SinhVien sv = null;
@@ -131,9 +140,12 @@ namespace Lab06_ThreeLayerMemory
                 DialogResult dr = MessageBox.Show($"Bạn có chắc muốn xóa sinh viên {sv.HoTen} không?", "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (dr == DialogResult.Yes)
                 {
-                    _ds.Remove(sv);
-                    LoadListView(_ds);
-                    LoadTree(_ds);
+                    // Xóa trực tiếp trong danh sách của DAL/BUS
+                    _bus.GetAll().Remove(sv);
+
+                    RefreshDataGrid();
+                    LoadListView(_bus.GetAll());
+                    LoadTree(_bus.GetAll());
                 }
             }
             else
@@ -142,6 +154,7 @@ namespace Lab06_ThreeLayerMemory
             }
         }
 
+        // 3. Chức năng Sửa sinh viên
         private void btnSua_Click(object sender, EventArgs e)
         {
             SinhVien sv = null;
@@ -162,9 +175,9 @@ namespace Lab06_ThreeLayerMemory
                     sv.NgaySinh = dtpNgaySinh.Value;
                     sv.DiemTB = double.Parse(txtDiemTB.Text);
 
-                    _ds.ResetBindings();
-                    LoadListView(_ds);
-                    LoadTree(_ds);
+                    RefreshDataGrid();
+                    LoadListView(_bus.GetAll());
+                    LoadTree(_bus.GetAll());
 
                     MessageBox.Show("Cập nhật thông tin thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
