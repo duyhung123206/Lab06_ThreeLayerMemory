@@ -39,13 +39,14 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.lvSinhVien = new System.Windows.Forms.ListView();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSinhVien)).BeginInit();
             this.SuspendLayout();
             // 
             // dgvSinhVien
             // 
             this.dgvSinhVien.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvSinhVien.Location = new System.Drawing.Point(343, 235);
+            this.dgvSinhVien.Location = new System.Drawing.Point(399, 351);
             this.dgvSinhVien.Name = "dgvSinhVien";
             this.dgvSinhVien.RowHeadersWidth = 51;
             this.dgvSinhVien.RowTemplate.Height = 24;
@@ -141,11 +142,22 @@
             this.label3.TabIndex = 10;
             this.label3.Text = "Điểm TB";
             // 
+            // lvSinhVien
+            // 
+            this.lvSinhVien.HideSelection = false;
+            this.lvSinhVien.Location = new System.Drawing.Point(25, 454);
+            this.lvSinhVien.Name = "lvSinhVien";
+            this.lvSinhVien.Size = new System.Drawing.Size(311, 97);
+            this.lvSinhVien.TabIndex = 11;
+            this.lvSinhVien.UseCompatibleStateImageBehavior = false;
+            this.lvSinhVien.SelectedIndexChanged += new System.EventHandler(this.lvSinhVien_SelectedIndexChanged);
+            // 
             // frmDanhSach
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1087, 622);
+            this.Controls.Add(this.lvSinhVien);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -179,5 +191,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ListView lvSinhVien;
     }
 }
